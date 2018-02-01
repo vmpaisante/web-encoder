@@ -1,0 +1,37 @@
+-------------------
+| PRODUCT BACKLOG |
+-------------------
+
+Introduction
+------------
+This document contains the characteristics and features to be implemented in
+this project and tasks needed done.
+
+Backlog
+-------
+
+- Must use github for version control
+- Must be a Web application
+- Use Java as programming language
+- Use Spring Boot as development framework
+- Deploy in Heroku
+- Full unit testing
+- Should have a screen to upload and convert a selected video file
+- Has to indicate on screen that convertion is under way
+- Allows to watch the converted video file when convertion is done
+- Stores all files in Amazon S3
+- Encoding using Zencoder
+
+Tasks
+-----
+* Create github repository
+* Create spring boot stardard application
+* Test standard app
+* Deploy to heroku
+* Create main screen
+* Make app upload a file to S3 through main screen
+* Test uploading to S3
+* Make app convert the uploaded file through Zencoder
+* Make app change from main screen to video player after encoding
+* Make app play the encoded video
+* Make main screen show a on going animation while the encoding is being done
