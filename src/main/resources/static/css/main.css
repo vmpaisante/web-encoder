@@ -1,27 +1,34 @@
 /* Application-wide Styles */
 h1 {
-  color: #369;
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 250%;
+  font-size: 200%;
 }
 h2, h3 {
-  color: #444;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
+  font-size: 150%;
 }
 body {
   margin: 2em;
+  background-color: #9FE6FD;
 }
 body, input[text], button {
   color: #888;
   font-family: Cambria, Georgia;
 }
-.container {
+.body {
   display: flex;
   justify-content: center;
 }
-.center {
+.container {
   width: 400px;
+  background-color: #FFDB60;
+  padding: 50px;
+  border: 5px solid black;
+}
+
+.italic {
+  font-style: italic;
 }
 /* everywhere else */
 * {
