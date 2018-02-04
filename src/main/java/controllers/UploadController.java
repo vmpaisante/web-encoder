@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import webencoder.storage.StorageFileNotFoundException;
 import webencoder.storage.StorageService;
@@ -35,24 +36,22 @@ public class UploadController {
     }
 
     @GetMapping("/")
-    public String greeting(@RequestParam(value="name", required=false, defaultValue="World") String name, Model model) {
+    public String initialAccess(@RequestParam(value="name", required=false, defaultValue="World") String name, Model model) {
         return "upload";
     }
 
-    @GetMapping("/files/{filename:.+}")
-    @ResponseBody
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-
-        Resource file = storageService.loadAsResource(filename);
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+    @GetMapping("/input/{filename:.+}")
+    public RedirectView redirectToFile(@PathVariable String filename) {
+        RedirectView redirectView = new RedirectView();
+        redirectView.setUrl(this.storageService.path("input/" + filename));
+        return redirectView;
     }
 
-    @PostMapping("/")
+    @PostMapping("/input")
     public String handleFileUpload(@RequestParam("file") MultipartFile file,
             RedirectAttributes redirectAttributes) {
 
-        storageService.store(file);
+        storageService.store(file, "input");
         redirectAttributes.addFlashAttribute("message",
                 "You successfully uploaded " + file.getOriginalFilename() + "!");
 
