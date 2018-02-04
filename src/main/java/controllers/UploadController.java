@@ -36,12 +36,17 @@ public class UploadController {
     }
 
     @GetMapping("/")
-    public String initialAccess(@RequestParam(value="name", required=false, defaultValue="World") String name, Model model) {
+    public String initialAccess() {
+        return "redirect:/upload";
+    }
+
+    @GetMapping("/upload")
+    public String uploadFile() {
         return "upload";
     }
 
     @GetMapping("/input/{filename:.+}")
-    public RedirectView redirectToFile(@PathVariable String filename) {
+    public RedirectView redirectToInputFile(@PathVariable String filename) {
         RedirectView redirectView = new RedirectView();
         redirectView.setUrl(this.storageService.path("input/" + filename));
         return redirectView;
@@ -56,6 +61,13 @@ public class UploadController {
                 "You successfully uploaded " + file.getOriginalFilename() + "!");
 
         return "redirect:/";
+    }
+
+    @GetMapping("/output/{filename:.+}")
+    public RedirectView redirectToOutputFile(@PathVariable String filename) {
+        RedirectView redirectView = new RedirectView();
+        redirectView.setUrl(this.storageService.path("output/" + filename));
+        return redirectView;
     }
 
     @ExceptionHandler(StorageFileNotFoundException.class)
