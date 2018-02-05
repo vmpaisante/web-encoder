@@ -56,27 +56,31 @@ public class UploadController {
         @RequestParam("file") MultipartFile file,
         Model model)
     {
-        // Store file to S3.
-        storageService.store(file, "input");
-        // Process file names
-        String input_filename = file.getOriginalFilename();
-        String output_filename =
-          FilenameUtils.removeExtension(input_filename) + ".webm";
+        try {
+            // Store file to S3.
+            storageService.store(file, "input");
+            // Process file names
+            String input_filename = file.getOriginalFilename();
+            String output_filename =
+              FilenameUtils.removeExtension(input_filename) + ".webm";
 
-        // Encode file and save it to S3.
-        String response = encoding_service.encode(
-          input_filename, "input",
-          output_filename, "output"
-        );
+            // Encode file and save it to S3.
+            String response = encoding_service.encode(
+              input_filename, "input",
+              output_filename, "output"
+            );
 
-        // Add response attributes to model.
-        JSONObject response_JSON = new JSONObject(response);
-        model.addAttribute("input_id", response_JSON.get("input_id"));
-        model.addAttribute("output_id", response_JSON.get("output_id"));
-        model.addAttribute("output_link", "/watch/" + output_filename);
-        model.addAttribute("zencoder_key", response_JSON.get("zencoder_key"));
+            // Add response attributes to model.
+            JSONObject response_JSON = new JSONObject(response);
+            model.addAttribute("input_id", response_JSON.get("input_id"));
+            model.addAttribute("output_id", response_JSON.get("output_id"));
+            model.addAttribute("output_link", "/watch/" + output_filename);
+            model.addAttribute("zencoder_key", response_JSON.get("zencoder_key"));
 
-        return "encoding";
+            return "encoding";
+        } catch(Exception e) {
+            return "upload";
+        }
     }
 
     @GetMapping("/watch/{filename:.+}")
