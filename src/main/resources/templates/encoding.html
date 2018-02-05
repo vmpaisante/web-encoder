@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Getting Started: Serving Web Content</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="/css/main.css" rel="stylesheet"></link>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="/js/encode.js" type="text/javascript" language="JavaScript"></script>
+</head>
+<body>
+      <div class="body">
+      <div class="container">
+        <h1>WebEncoder</h1>
+        <h2>Upload &#8594; <b>Encode</b> &#8594; Watch!</h2>
+
+        <p class="input_id" th:text="${input_id}"/>
+        <p class="output_id" th:text="${output_id}"/>
+        <p class="output_url" th:text="${output_filename}"/>
+        <p class="zencoder_key" th:text="${zencoder_key}"/>
+
+      	<div class="status">
+      		Encoding
+      	</div>
+
+        <div class="goback">
+      		<a href="/">GO BACK AND TRY AGAIN</a>
+      	</div>
+
+        <div class="watch">
+      		<a th:href="${output_link}">Watch now!</a>
+      	</div>
+
+        <p class="italic">by Vitor Mendes Paisante</p>
+      </div>
+      </div>
+</body>
+</html>

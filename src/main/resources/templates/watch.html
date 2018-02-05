@@ -9,20 +9,20 @@
       <div class="body">
       <div class="container">
         <h1>WebEncoder</h1>
-        <h2><b>Upload</b> &#8594; Encode &#8594; Watch!</h2>
+        <h2>Upload &#8594; Encode &#8594; <b>Watch!</b></h2>
 
         <div th:if="${message}">
       		<h2 th:text="${message}"/>
       	</div>
 
       	<div>
-      		<form method="POST" enctype="multipart/form-data" action="/encode">
-                Choose a video file:
-      			<table>
-      				<tr><td><input type="file" name="file" /></td><td></td></tr>
-      				<tr><td><input type="submit" value="Upload" /></td><td></td></tr>
-      			</table>
-      		</form>
+            <video width="320" height="240" controls="controls" autoplay="autoplay">
+              <source th:src="${source}" type="video/webm" />
+            Your browser does not support the video tag.
+            </video>
+      	</div>
+        <div class="goback">
+      		<a href="/">Go back</a>
       	</div>
         <p class="italic">by Vitor Mendes Paisante</p>
       </div>
