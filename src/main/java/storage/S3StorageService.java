@@ -105,8 +105,8 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public String path(String filename) {
+    public String path(String filename, String local_path) {
         String root_location = this.storage_properties.getLocation();
-        return root_location + "/" + this.s3_storage_properties.getBucketName() + "/" + filename;
+        return root_location + "/" + this.s3_storage_properties.getBucketName() + "/" + local_path + "/" + filename;
     }
 }

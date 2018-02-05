@@ -14,6 +14,6 @@ public interface StorageService {
 
     Resource load(String filename);
 
-    String path(String filename);
+    String path(String filename, String local_path);
 
 }

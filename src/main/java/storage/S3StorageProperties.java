@@ -8,6 +8,14 @@ public class S3StorageProperties {
   private String bucket_name = "unknown";
   private String key = "unknown";
   private String private_key = "unknown";
+  private String region = "unknown";
+
+  public String getRegion() {
+    return this.region;
+  }
+  public void setRegion(String name) {
+    this.region = name;
+  }
 
   public String getKey() {
     return this.key;
