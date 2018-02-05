@@ -44,7 +44,7 @@ public class S3StorageService implements StorageService {
 
     private final AmazonS3 s3client;
     private final StorageProperties storage_properties;
-	private final S3StorageProperties s3_storage_properties;
+	  private final S3StorageProperties s3_storage_properties;
 
     @Autowired
     public S3StorageService(StorageProperties properties, S3StorageProperties s3_properties) {
@@ -89,7 +89,7 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public Resource load(String filename) {
+    public Resource load(String filename, String path) {
         S3Object s3_file = this.s3client.getObject(this.s3_storage_properties.getBucketName(), filename);
         S3ObjectInputStream file_stream = s3_file.getObjectContent();
 
