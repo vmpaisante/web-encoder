@@ -34,4 +34,4 @@ Tasks
 * Make app convert the uploaded file through Zencoder
 * Make app change from main screen to video player after encoding
 * Make app play the encoded video
-* Make main screen show a on going animation while the encoding is being done
+* Make main screen show on going status while the encoding is being done
