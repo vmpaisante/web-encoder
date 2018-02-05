@@ -2,6 +2,15 @@ package webencoder.encoding;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/*
+Properties for the Zencoder service.
+
+It stores the Zencoder full access key, used within the Application
+to create encoding jobs.
+The Zencoder read key, to be passed to the font end in order to monitor
+encoding progress.
+Lastly, the Zencoder job url from Zencoder API.
+*/
 @ConfigurationProperties("encoding.zencoder")
 public class ZencoderProperties {
 

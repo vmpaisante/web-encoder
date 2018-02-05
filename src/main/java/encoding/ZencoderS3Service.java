@@ -1,37 +1,30 @@
 package webencoder.encoding;
 
-import java.io.IOException;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.HttpURLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.stream.Stream;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.core.io.InputStreamResource;
-
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.lang.StringBuffer;
+import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import org.json.JSONObject;
 import org.json.JSONArray;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Service;
+import webencoder.Application;
+import webencoder.encoding.EncodingException;
 import webencoder.encoding.ZencoderProperties;
 import webencoder.storage.S3StorageProperties;
 
+/*
+Class that provides the encoding service using Zencoder and S3.
+
+Its encoding uses a file present in S3 and commands Zencoder to store
+the encoded file in S3 as well.
+
+It uses ConfigurationProperties to store data like keys and S3 information.
+*/
 @Service
 @EnableConfigurationProperties(ZencoderProperties.class)
 public class ZencoderS3Service implements EncodingService {
@@ -59,26 +52,30 @@ public class ZencoderS3Service implements EncodingService {
       String input,
       String output
     ) {
-        JSONObject request_body = new JSONObject();
-        // Set API key with full access to Zencoder service.
-        request_body.put("api_key", zencoder_properties.getFullKey());
-        // Set input url from Amazon AWS.
-        request_body.put(
-          "input",
-          "s3+" + s3_properties.getRegion() + "://" +
-            s3_properties.getBucketName() + input
-        );
-        // Set output configuration data
-        JSONObject json_output = new JSONObject();
-        json_output.put(
-          "url",
-          "s3+" + s3_properties.getRegion() + "://"
-            + s3_properties.getBucketName() + output
-        );
-        json_output.put("public", "true");
-        request_body.put("output", json_output);
-        // return request JSON
-        return request_body.toString();
+        try {
+            JSONObject request_body = new JSONObject();
+            // Set API key with full access to Zencoder service.
+            request_body.put("api_key", zencoder_properties.getFullKey());
+            // Set input url from Amazon AWS.
+            request_body.put(
+              "input",
+              "s3+" + s3_properties.getRegion() + "://" +
+                s3_properties.getBucketName() + input
+            );
+            // Set output configuration data
+            JSONObject json_output = new JSONObject();
+            json_output.put(
+              "url",
+              "s3+" + s3_properties.getRegion() + "://"
+                + s3_properties.getBucketName() + output
+            );
+            json_output.put("public", "true");
+            request_body.put("output", json_output);
+            // return request JSON
+            return request_body.toString();
+        } catch(Exception e){
+          throw new EncodingException("Error creating request body for encoding job.");
+        }
     }
 
     /*
@@ -102,10 +99,10 @@ public class ZencoderS3Service implements EncodingService {
         wr.flush();
         wr.close();
         // Get response code.
-        int responseCode = con.getResponseCode();
+        int response_code = con.getResponseCode();
         //Log.
-        System.out.println("\nSending 'POST' request to URL : " + url);
-        System.out.println("Response Code : " + responseCode);
+        Application.logger.info("\nSending 'POST' request to URL : " + url);
+        Application.logger.info("Response Code : " + response_code);
         // Read response
         BufferedReader in = new BufferedReader(
         new InputStreamReader(con.getInputStream()));
@@ -116,11 +113,11 @@ public class ZencoderS3Service implements EncodingService {
         }
         in.close();
         // Return response in string format.
-        System.out.println("RESPONSE:");
-        System.out.println(response.toString());
+        Application.logger.info("RESPONSE:");
+        Application.logger.info(response.toString());
         return response.toString();
       } catch(Exception e){
-        return null;
+        throw new EncodingException("Error when sending Zencoder job.");
       }
     }
 
@@ -139,15 +136,14 @@ public class ZencoderS3Service implements EncodingService {
       String output_filename,
       String output_path
      ) {
-      try {
           // Create json request body.
           String request_body = createJSONRequestBody(
             "/" + input_path + "/" + input_filename,
             "/" + output_path + "/" + output_filename
           );
           // Log.
-          System.out.println("JOB REQUEST:");
-          System.out.println(request_body);
+          Application.logger.info("JOB REQUEST:");
+          Application.logger.info(request_body);
           // Create and send encoding request to Zencoder.
           String response = sendEncodeRequest(request_body);
           // Prepare return string.
@@ -161,10 +157,7 @@ public class ZencoderS3Service implements EncodingService {
           return_JSON.put("output_id", output_id);
           return_JSON.put("output_url", output_url);
           return_JSON.put("zencoder_key", zencoder_properties.getReadKey());
-
+          // Return string
           return return_JSON.toString();
-      } catch(Exception e){
-        return null;
-      }
     }
 }
