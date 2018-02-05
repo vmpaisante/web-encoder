@@ -1,13 +1,7 @@
 package webencoder.controllers;
 
-import java.io.IOException;
-import java.util.stream.Collectors;
-
 import org.apache.commons.io.FilenameUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,41 +10,56 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
-
 import webencoder.storage.StorageFileNotFoundException;
 import webencoder.storage.StorageService;
 import webencoder.encoding.EncodingService;
-
 import org.json.JSONObject;
-import org.json.JSONArray;
 
+/*
+Main controller that handles the routing for the application.
+
+It provides the functionality of uploading through a POST request a
+file into the storage service, it initiates an encoding job with
+the encoding service and allows the user to watch a video from a url
+from the storage service.
+*/
 @Controller
-public class UploadController {
+public class MainController {
 
     private final StorageService storageService;
     private final EncodingService encoding_service;
 
     @Autowired
-    public UploadController(StorageService storageService, EncodingService encoding_service) {
+    public MainController(StorageService storageService, EncodingService encoding_service) {
         this.storageService = storageService;
         this.encoding_service = encoding_service;
     }
 
+    /*
+    Root mapping that diverges to /upload.
+    */
     @GetMapping("/")
     public String initialAccess() {
         return "redirect:/upload";
     }
 
+    /*
+    Initial view.
+    */
     @GetMapping("/upload")
     public String uploadFile() {
         return "upload";
     }
 
+    /*
+    Store the file received from POST request, then initiate a encoding job.
+
+    This function returns the encoding view passing to it all data necessary
+    for keeping track of the encoding job. It redirect to upload again if no
+    file is received.
+    */
     @PostMapping("/encode")
     public String handleFileUpload(
         @RequestParam("file") MultipartFile file,
@@ -83,30 +92,14 @@ public class UploadController {
         }
     }
 
+    /*
+    Allows the user to watch an encoded video.
+    */
     @GetMapping("/watch/{filename:.+}")
     public String watchFile(@PathVariable String filename, Model model) {
         String link = storageService.path(filename, "output");
         model.addAttribute("source", link);
         return "watch";
-    }
-
-    @GetMapping("/input/{filename:.+}")
-    public RedirectView redirectToInputFile(@PathVariable String filename) {
-        RedirectView redirectView = new RedirectView();
-        redirectView.setUrl(this.storageService.path(filename, "input"));
-        return redirectView;
-    }
-
-    @GetMapping("/output/{filename:.+}")
-    public RedirectView redirectToOutputFile(@PathVariable String filename) {
-        RedirectView redirectView = new RedirectView();
-        redirectView.setUrl(this.storageService.path(filename, "output"));
-        return redirectView;
-    }
-
-    @ExceptionHandler(StorageFileNotFoundException.class)
-    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-        return ResponseEntity.notFound().build();
     }
 
 }

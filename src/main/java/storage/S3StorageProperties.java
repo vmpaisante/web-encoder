@@ -2,6 +2,12 @@ package webencoder.storage;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/*
+Properties for the S3 storage service.
+
+It stores the S3 bucket name, as well the public and private key for
+accessing S3 and the region selected for the bucket.
+*/
 @ConfigurationProperties("storage.s3")
 public class S3StorageProperties {
 

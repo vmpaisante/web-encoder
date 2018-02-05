@@ -11,6 +11,11 @@ import org.springframework.context.annotation.Bean;
 import webencoder.storage.StorageProperties;
 import webencoder.storage.StorageService;
 
+/*
+Main application file.
+
+It runs the application and cunstructs the Logger.
+*/
 @SpringBootApplication
 @EnableConfigurationProperties(StorageProperties.class)
 public class Application {

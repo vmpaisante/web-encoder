@@ -1,43 +1,32 @@
 package webencoder.storage;
 
 import java.io.IOException;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.stream.Stream;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.InputStreamResource;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.util.List;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.S3Object;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-
 import webencoder.storage.S3StorageProperties;
+import webencoder.Application;
 
+/*
+Storage service that uses Amazon's S3 as a storage medium.
+
+It implements all StorageService interface using only S3, inserting and
+reading from it. It uses ConfigurationProperties to store sensitive information
+like access key and bucket region.
+*/
 @Service
 @EnableConfigurationProperties(S3StorageProperties.class)
 public class S3StorageService implements StorageService {
@@ -46,8 +35,15 @@ public class S3StorageService implements StorageService {
     private final StorageProperties storage_properties;
 	  private final S3StorageProperties s3_storage_properties;
 
+    /*
+    Class constructor.
+
+    It sets up the amazon s3 client for further uinterface calls.
+    */
     @Autowired
-    public S3StorageService(StorageProperties properties, S3StorageProperties s3_properties) {
+    public S3StorageService(
+        StorageProperties properties, S3StorageProperties s3_properties
+    ) {
         this.storage_properties = properties;
         this.s3_storage_properties = s3_properties;
 
@@ -59,9 +55,17 @@ public class S3StorageService implements StorageService {
         this.s3client = new AmazonS3Client(credentials);
     }
 
+    /*
+    This storage service does not require initial computation.
+    */
     @Override
     public void init() {}
 
+    /*
+    Store the MultipartFile file into Amazon's S3 storage.
+
+    It uses path to resolve the file's folder inside S3
+    */
     @Override
     public void store(MultipartFile file, String path) {
         String filename = StringUtils.cleanPath(file.getOriginalFilename());
@@ -78,33 +82,42 @@ public class S3StorageService implements StorageService {
 
     		// upload file to s3
     		String fileName = path + "/" + filename;
+
     		this.s3client.putObject(new PutObjectRequest(this.s3_storage_properties.getBucketName(), fileName,
     				file.getInputStream(), new ObjectMetadata())
                     .withCannedAcl(CannedAccessControlList.PublicRead));
-
+            Application.logger.info("Stored "+fileName+" into S3");
         }
         catch (IOException e) {
             throw new StorageException("Failed to store file " + filename, e);
         }
     }
 
+    /*
+    Load and returns as resource the file within the path folder in S3.
+    */
     @Override
     public Resource load(String filename, String path) {
-        S3Object s3_file = this.s3client.getObject(this.s3_storage_properties.getBucketName(), filename);
+        S3Object s3_file = this.s3client.getObject(
+            this.s3_storage_properties.getBucketName(), path + "/" + filename
+        );
         S3ObjectInputStream file_stream = s3_file.getObjectContent();
 
         Resource resource = new InputStreamResource(file_stream);
         if (resource.exists() || resource.isReadable()) {
+            Application.logger.info("Loaded "+path + "/" + filename+" into S3");
             return resource;
         }
         else {
             throw new StorageFileNotFoundException(
                     "Could not read file: " + filename);
-
         }
     }
 
     @Override
+    /*
+    Return S3 path for the file name and path received.
+    */
     public String path(String filename, String local_path) {
         String root_location = this.storage_properties.getLocation();
         return root_location + "/" + this.s3_storage_properties.getBucketName() + "/" + local_path + "/" + filename;
