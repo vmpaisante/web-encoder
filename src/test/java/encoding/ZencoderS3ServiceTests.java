@@ -33,7 +33,7 @@ public class ZencoderS3ServiceTests {
     }
 
     @Test
-    public void encodeRequestCorrect() {
+    public void encodeRequestReceived() {
         try {
             String response = service.encode("sample.dv", "test_input",
                                              "sample.webm", "test_output");
